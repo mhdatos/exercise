@@ -20,11 +20,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const spotsLeft = details.max_participants - details.participants.length;
 
+        // Teilnehmerliste als Bulleted List
+        let participantsSection = `<div class="activity-card-participants">
+          <div class="activity-card-participants-title">Participants:</div>`;
+        if (details.participants && details.participants.length > 0) {
+          participantsSection += `<ul class="activity-card-participants-list">`;
+          details.participants.forEach(email => {
+            participantsSection += `<li>${email}</li>`;
+          });
+          participantsSection += `</ul>`;
+        } else {
+          participantsSection += `<div class="activity-card-participants-list"><em>None yet</em></div>`;
+        }
+        participantsSection += `</div>`;
+
         activityCard.innerHTML = `
           <h4>${name}</h4>
           <p>${details.description}</p>
           <p><strong>Schedule:</strong> ${details.schedule}</p>
           <p><strong>Availability:</strong> ${spotsLeft} spots left</p>
+          ${participantsSection}
         `;
 
         activitiesList.appendChild(activityCard);
@@ -39,6 +54,35 @@ document.addEventListener("DOMContentLoaded", () => {
       activitiesList.innerHTML = "<p>Failed to load activities. Please try again later.</p>";
       console.error("Error fetching activities:", error);
     }
+  }
+
+  // Function to render activities
+  function renderActivities(activities) {
+    const activitiesList = document.getElementById("activities-list");
+    activitiesList.innerHTML = "";
+
+    Object.entries(activities).forEach(([name, activity]) => {
+      const spotsLeft = activity.max_participants - (activity.participants ? activity.participants.length : 0);
+      const participants =
+        activity.participants && activity.participants.length > 0
+          ? "participants : " +
+            activity.participants
+              .map((email, idx) => `${idx + 1}- ${email}`)
+              .join(" ")
+          : "participants : <em>none</em>";
+
+      const card = document.createElement("div");
+      card.className = "activity-card";
+
+      card.innerHTML = `
+        <h4>${name}</h4>
+        <p>${activity.description}</p>
+        <p><strong>Schedule:</strong> ${activity.schedule}</p>
+        <p><strong>Availability:</strong> ${spotsLeft} spots left ${participants}</p>
+      `;
+
+      activitiesList.appendChild(card);
+    });
   }
 
   // Handle form submission
